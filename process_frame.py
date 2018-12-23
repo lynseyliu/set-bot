@@ -1,6 +1,7 @@
 import numpy as np
 import cv2
 import math
+import matplotlib.pyplot as plt
 
 # Read and process layout imagge
 layout = cv2.imread('layout.jpg')
@@ -34,32 +35,24 @@ for i in range(0, len(card_contours)):
     transform = cv2.getPerspectiveTransform(approx, rect)
     warp = cv2.warpPerspective(layout, transform, (w, h))
 
-    # White balance, contrast?
-
     # It's feature extraction time!
-    # ................................................
-    # Color segmentation
-    # Set color bounds, Order: red, green, purple
-    color_bounds = [
-        # ([0, 0, 50], [80, 80, 255]),
-        # ([17, 100, 15], [50, 200, 56]),
-        ([30, 0, 30], [255, 80, 255]),
-    ]
-    for (lower, upper) in color_bounds:
-        # Convert to np arrays
-        lower = np.array(lower, dtype="uint8")
-        upper = np.array(upper, dtype="uint8")
-    
-        # Find pixels within bounds and apply mask
-        mask = cv2.inRange(warp, lower, upper)
-        output = cv2.bitwise_and(warp, warp, mask=mask)
-        cv2.imwrite('color' + str(i) + '.jpg', output)
+    #  |-|   _    *  __
+    #  |-|   |  *    |/'
+    #  |-|   |~*~~~o~|
+    #  |-|   |  O o *|
+    # /___\  |o___O__|
 
-    # warp_gray = cv2.cvtColor(warp, cv2.COLOR_BGR2GRAY)
-    # ret, warp_thresh = cv2.threshold(warp_gray, 127, 255, cv2.THRESH_BINARY_INV)
-    # warp_thresh = 255 - warp_thresh
-    # warp_thresh, shape_contours, hierarchy = cv2.findContours(warp_thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    # cv2.drawContours(warp, shape_contours, 0, (0, 0, 255), 1, 8, hierarchy)
-    # print(hierarchy)
-    # print('-------')
-    # cv2.imwrite('shapes' + str(i) + '.jpg', warp)
+    # Find shapes using contours
+    warp_gray = cv2.cvtColor(warp, cv2.COLOR_BGR2GRAY)
+    ret, warp_thresh = cv2.threshold(warp_gray, 127, 255, cv2.THRESH_BINARY_INV)
+    warp_thresh = 255 - warp_thresh
+    warp_thresh, shape_contours, hierarchy = cv2.findContours(warp_thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    filtered_shapes = []
+    for i, c in enumerate(shape_contours):
+        perim = cv2.arcLength(c, True)
+        if perim > 100 and perim < 2 * (w + h) - 100:# and hierarchy[0][i][3] == 0:
+        #if cv2.contourArea(c) > 50 and cv2.contourArea(c) < (w * h) / 2:
+            #cv2.drawContours(warp, [c], -1, (255, 0, 0), 1, 8)
+            filtered_shapes.append(c)
+    cv2.drawContours(warp, filtered_shapes, -1, (255, 0, 0), 1, 8)
+    cv2.imwrite('shapes' + str(i) + '.jpg', warp)
