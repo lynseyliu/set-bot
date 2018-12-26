@@ -49,11 +49,10 @@ h = 200
 # Result rectangle corners, Order to match approx: top left, bottom left, bottom right, top right
 rect = np.array([[0, 0], [0, h-1], [w-1, h-1], [w-1, 0]], np.float32)
 
-# Warp and classify each card
+# Filter card candidates, warp and classify each card
 classed_cards = set()
-for i in range(0, len(card_contours)):
+for card in card_contours:
     # Get contour and perimeter length, check perim for faulty contours
-    card = card_contours[i]
     perim = cv2.arcLength(card, True)
     # Ignore random contours in the layout image that aren't cards
     if perim < 100:
@@ -81,7 +80,7 @@ for i in range(0, len(card_contours)):
 
     # Remove contour noise caused by patterns, edge
     filtered_shapes = []
-    for j, c in enumerate(shape_contours):
+    for c in shape_contours:
         perim = cv2.arcLength(c, True)
         if perim > 100 and perim < 2 * (w + h) - 100:
             filtered_shapes.append(c)
@@ -89,13 +88,13 @@ for i in range(0, len(card_contours)):
     # Remove duplicate "inner" shape contours
     # Compare each pair of contours (will be in order outer, inner if applicable)
     shapes_copy = filtered_shapes.copy()
-    j = 0
-    while j < len(shapes_copy) - 1:
-        shape_perim = cv2.arcLength(shapes_copy[j], True)
-        next_perim = cv2.arcLength(shapes_copy[j+1], True)
+    i = 0
+    while i < len(shapes_copy) - 1:
+        shape_perim = cv2.arcLength(shapes_copy[i], True)
+        next_perim = cv2.arcLength(shapes_copy[i+1], True)
         if next_perim < shape_perim - 10:
-            filtered_shapes.remove(shapes_copy[j+1])
-        j += 2
+            filtered_shapes.remove(shapes_copy[i+1])
+        i += 2
 
     # Set number class based on shape count
     num_class = len(filtered_shapes)
@@ -104,20 +103,26 @@ for i in range(0, len(card_contours)):
     fill_mask = np.zeros(warp.shape[:2], np.uint8)
     cv2.drawContours(fill_mask, [filtered_shapes[0]], 0, (255,255,255), -1)
     cv2.drawContours(fill_mask, [filtered_shapes[0]], 0, 0, 5)
+
     outline_mask = np.zeros(warp.shape[:2], np.uint8)
     cv2.drawContours(outline_mask, [filtered_shapes[0]], 0, (255,255,255), 15)
     outline_mask = fill_mask & outline_mask
 
+    bkg_mask = np.zeros(warp.shape[:2], np.uint8)
+    bkg_mask.fill(255)
+    for i in range(len(filtered_shapes)):
+        cv2.drawContours(bkg_mask, [filtered_shapes[i]], 0, 0, -1)
+
     # Convert card to hsv
     warp_hsv = cv2.cvtColor(warp, cv2.COLOR_BGR2HSV).astype('float32')
-    (mean_h, mean_s, mean_v, mean_a) = cv2.mean(warp_hsv, outline_mask)
+    (outline_h, outline_s, outline_v, outline_a) = cv2.mean(warp_hsv, outline_mask)
 
     # Set color class based on hue value
-    if mean_h >= 0 and mean_h < 40:
+    if outline_h >= 0 and outline_h < 40:
         color_class = 'red'
-    elif mean_h >= 40 and mean_h < 100:
+    elif outline_h >= 40 and outline_h < 100:
         color_class = 'green'
-    elif mean_h >= 100:
+    elif outline_h >= 100:
         color_class = 'purple'
 
     # Get match values between card shape and actual shape contours
@@ -129,4 +134,6 @@ for i in range(0, len(card_contours)):
     # Set shape class based on closest matching shape contour
     shape_class = SHAPES[matches.index(min(matches))]
 
-    # Pattern
+    (bkg_h, bkg_s, bkg_v, bkg_a) = cv2.mean(warp_hsv, bkg_mask)
+    (fill_h, fill_s, fill_v, fill_a) = cv2.mean(warp_hsv, fill_mask)
+    
