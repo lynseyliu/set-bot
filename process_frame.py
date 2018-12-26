@@ -4,19 +4,19 @@ import math
 # import matplotlib.pyplot as plt
 
 # Get shape contours
-pill_img = cv2.imread('pill.jpg')
+pill_img = cv2.imread('img/pill.jpg')
 pill_img = cv2.cvtColor(pill_img, cv2.COLOR_BGR2GRAY)
 _, pill_img = cv2.threshold(pill_img, 127, 255, cv2.THRESH_BINARY)
 _, PILL, _ = cv2.findContours(pill_img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 PILL = PILL[0]
 
-diamond_img = cv2.imread('diamond.jpg')
+diamond_img = cv2.imread('img/diamond.jpg')
 diamond_img = cv2.cvtColor(diamond_img, cv2.COLOR_BGR2GRAY)
 _, diamond_img = cv2.threshold(diamond_img, 127, 255, cv2.THRESH_BINARY)
 _, DIAMOND, _ = cv2.findContours(diamond_img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 DIAMOND = DIAMOND[0]
 
-snake_img = cv2.imread('snake.jpg')
+snake_img = cv2.imread('img/snake.jpg')
 snake_img = cv2.cvtColor(snake_img, cv2.COLOR_BGR2GRAY)
 _, snake_img = cv2.threshold(snake_img, 127, 255, cv2.THRESH_BINARY)
 _, SNAKE, _ = cv2.findContours(snake_img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -25,7 +25,7 @@ SNAKE = SNAKE[0]
 SHAPES = ['pill', 'diamond', 'snake']
 
 # Read and process layout image
-layout = cv2.imread('layout.jpg')
+layout = cv2.imread('img/layout.jpg')
 # Increase saturation
 layout_hsv = cv2.cvtColor(layout, cv2.COLOR_BGR2HSV).astype('float32')
 (h, s, v) = cv2.split(layout_hsv)
@@ -137,3 +137,4 @@ for card in card_contours:
     (bkg_h, bkg_s, bkg_v, bkg_a) = cv2.mean(warp_hsv, bkg_mask)
     (fill_h, fill_s, fill_v, fill_a) = cv2.mean(warp_hsv, fill_mask)
     
+    print(num_class, color_class, shape_class)
