@@ -3,6 +3,27 @@ import cv2
 import math
 # import matplotlib.pyplot as plt
 
+# Get shape contours
+pill_img = cv2.imread('pill.jpg')
+pill_img = cv2.cvtColor(pill_img, cv2.COLOR_BGR2GRAY)
+_, pill_img = cv2.threshold(pill_img, 127, 255, cv2.THRESH_BINARY)
+_, PILL, _ = cv2.findContours(pill_img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+PILL = PILL[0]
+
+diamond_img = cv2.imread('diamond.jpg')
+diamond_img = cv2.cvtColor(diamond_img, cv2.COLOR_BGR2GRAY)
+_, diamond_img = cv2.threshold(diamond_img, 127, 255, cv2.THRESH_BINARY)
+_, DIAMOND, _ = cv2.findContours(diamond_img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+DIAMOND = DIAMOND[0]
+
+snake_img = cv2.imread('snake.jpg')
+snake_img = cv2.cvtColor(snake_img, cv2.COLOR_BGR2GRAY)
+_, snake_img = cv2.threshold(snake_img, 127, 255, cv2.THRESH_BINARY)
+_, SNAKE, _ = cv2.findContours(snake_img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+SNAKE = SNAKE[0]
+
+SHAPES = ['pill', 'diamond', 'snake']
+
 # Read and process layout image
 layout = cv2.imread('layout.jpg')
 # Increase saturation
@@ -12,7 +33,6 @@ s = s * 2
 s = np.clip(s, 0, 255)
 layout_hsv = cv2.merge([h, s, v])
 layout = cv2.cvtColor(layout_hsv.astype('uint8'), cv2.COLOR_HSV2BGR)
-cv2.imwrite('saturation.jpg', layout)
 # Grayscale
 layout_gray = cv2.cvtColor(layout, cv2.COLOR_BGR2GRAY)
 ret, layout_thresh = cv2.threshold(layout_gray, 127, 255, cv2.THRESH_BINARY_INV)
@@ -45,7 +65,7 @@ for i in range(0, len(card_contours)):
     # Warp
     transform = cv2.getPerspectiveTransform(approx, rect)
     warp = cv2.warpPerspective(layout, transform, (w, h))
-    
+
     # It's feature extraction time!
     #  |-|   _    *  __
     #  |-|   |  *    |/'
@@ -100,7 +120,13 @@ for i in range(0, len(card_contours)):
     elif mean_h >= 100:
         color_class = 'purple'
 
-    # classed_cards.add({'shape': shape_class,
-    #                    'number': num_class,
-    #                    'pattern': pattern_class,
-    #                    'color': color_class})
+    # Get match values between card shape and actual shape contours
+    pill_match = cv2.matchShapes(PILL, filtered_shapes[0], 1, 0.0)
+    diamond_match = cv2.matchShapes(DIAMOND, filtered_shapes[0], 1, 0.0)
+    snake_match = cv2.matchShapes(SNAKE, filtered_shapes[0], 1, 0.0)
+    matches = [pill_match, diamond_match, snake_match]
+
+    # Set shape class based on closest matching shape contour
+    shape_class = SHAPES[matches.index(min(matches))]
+
+    # Pattern
