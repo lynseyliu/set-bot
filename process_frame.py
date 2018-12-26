@@ -22,7 +22,7 @@ layout_thresh = 255 - layout_thresh
 layout_thresh, card_contours, hierarchy = cv2.findContours(layout_thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
 # Specify dimensions of result rectangle
-# It's square right now because orientation is unknown
+# It's square right now because orientation is unknown ¯\_(ツ)_/¯
 w = 200
 h = 200
 
@@ -76,9 +76,29 @@ for i in range(0, len(card_contours)):
         if next_perim < shape_perim - 10:
             filtered_shapes.remove(shapes_copy[j+1])
         j += 2
-    
+
     # Set number class based on shape count
     num_class = len(filtered_shapes)
+
+    # Make masks based on first shape
+    fill_mask = np.zeros(warp.shape[:2], np.uint8)
+    cv2.drawContours(fill_mask, [filtered_shapes[0]], 0, (255,255,255), -1)
+    cv2.drawContours(fill_mask, [filtered_shapes[0]], 0, 0, 5)
+    outline_mask = np.zeros(warp.shape[:2], np.uint8)
+    cv2.drawContours(outline_mask, [filtered_shapes[0]], 0, (255,255,255), 15)
+    outline_mask = fill_mask & outline_mask
+
+    # Convert card to hsv
+    warp_hsv = cv2.cvtColor(warp, cv2.COLOR_BGR2HSV).astype('float32')
+    (mean_h, mean_s, mean_v, mean_a) = cv2.mean(warp_hsv, outline_mask)
+
+    # Set color class based on hue value
+    if mean_h >= 0 and mean_h < 40:
+        color_class = 'red'
+    elif mean_h >= 40 and mean_h < 100:
+        color_class = 'green'
+    elif mean_h >= 100:
+        color_class = 'purple'
 
     # classed_cards.add({'shape': shape_class,
     #                    'number': num_class,
