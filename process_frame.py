@@ -3,6 +3,8 @@ import cv2
 import math
 # import matplotlib.pyplot as plt
 
+test = ['empty', 'solid', 'striped', 'striped', 'solid', 'striped', 'empty', 'solid', 'solid', 'striped', 'empty', 'solid']
+
 # Get shape contours
 pill_img = cv2.imread('img/pill.jpg')
 pill_img = cv2.cvtColor(pill_img, cv2.COLOR_BGR2GRAY)
@@ -50,7 +52,8 @@ h = 200
 rect = np.array([[0, 0], [0, h-1], [w-1, h-1], [w-1, 0]], np.float32)
 
 # Filter card candidates, warp and classify each card
-classed_cards = set()
+# TESTING
+# j = 0
 for card in card_contours:
     # Get contour and perimeter length, check perim for faulty contours
     perim = cv2.arcLength(card, True)
@@ -65,6 +68,10 @@ for card in card_contours:
     transform = cv2.getPerspectiveTransform(approx, rect)
     warp = cv2.warpPerspective(layout, transform, (w, h))
 
+    # TESTING
+    # cv2.imwrite('warp' + str(j) + '.jpg', warp)
+    # j += 1
+
     # It's feature extraction time!
     #  |-|   _    *  __
     #  |-|   |  *    |/'
@@ -78,7 +85,7 @@ for card in card_contours:
     warp_thresh = 255 - warp_thresh
     warp_thresh, shape_contours, hierarchy = cv2.findContours(warp_thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
-    # Remove contour noise caused by patterns, edge
+    # Remove contour noise caused by patterns and edge
     filtered_shapes = []
     for c in shape_contours:
         perim = cv2.arcLength(c, True)
@@ -136,5 +143,20 @@ for card in card_contours:
 
     (bkg_h, bkg_s, bkg_v, bkg_a) = cv2.mean(warp_hsv, bkg_mask)
     (fill_h, fill_s, fill_v, fill_a) = cv2.mean(warp_hsv, fill_mask)
-    
-    print(num_class, color_class, shape_class)
+
+    if abs(bkg_h - fill_h) + abs(bkg_s - fill_s) + abs(bkg_v - fill_v) < \
+       abs(outline_h - fill_h) + abs(outline_s - fill_s) + abs(outline_v - fill_v):
+        pattern_class = 'empty'
+    elif abs(outline_h - fill_h) + abs(outline_s - fill_s) + abs(outline_v - fill_v) - \
+       abs(bkg_h - fill_h) + abs(bkg_s - fill_s) + abs(bkg_v - fill_v) > 140:
+        pattern_class = 'solid'
+    else:
+        pattern_class = 'striped'
+
+    # Correct for possible contour count error
+    if num_class > 3:
+        num_class = 3
+    elif num_class < 1:
+        num_class = 1
+
+    print(num_class, color_class, shape_class, pattern_class)
