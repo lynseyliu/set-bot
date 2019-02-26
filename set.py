@@ -1,9 +1,9 @@
 import time
 
 class Card:
-    # color =  r | g | b
-    # shape = d | o | s
-    # fill = e | d | f
+    # color =  red | green | purple
+    # shape = pill | diamond | snake
+    # fill = empty | solid | striped
     # number = 1 | 2 | 3
     def __init__(self, color, shape, fill, number):
         self.color = color
@@ -18,35 +18,44 @@ class Card:
         return self.color + " " + self.shape + " " + self.fill + " " + str(self.number)
 
 cards = []
-cards.append(Card('r', 's', 'd', 1))
-cards.append(Card('r', 'o', 'd', 2))
-cards.append(Card('r', 'd', 'd', 2))
-cards.append(Card('r', 'o', 'f', 2))
-cards.append(Card('g', 'd', 'f', 1))
-cards.append(Card('b', 'o', 'f', 3))
-cards.append(Card('r', 'd', 'e', 1))
-cards.append(Card('b', 'd', 'f', 2))
-cards.append(Card('g', 's', 'd', 2))
-cards.append(Card('g', 's', 'e', 1))
-cards.append(Card('g', 'o', 'e', 3))
-cards.append(Card('r', 'd', 'f', 3))
+cards.append(Card('red', 'snake', 'striped', 1))
+cards.append(Card('red', 'pill', 'striped', 2))
+cards.append(Card('red', 'diamond', 'striped', 2))
+cards.append(Card('red', 'pill', 'solid', 2))
+cards.append(Card('green', 'diamond', 'solid', 1))
+cards.append(Card('purple', 'pill', 'solid', 3))
+cards.append(Card('red', 'diamond', 'empty', 1))
+cards.append(Card('purple', 'diamond', 'solid', 2))
+cards.append(Card('green', 'snake', 'striped', 2))
+cards.append(Card('green', 'snake', 'empty', 1))
+cards.append(Card('green', 'pill', 'empty', 3))
+cards.append(Card('red', 'diamond', 'solid', 3))
+
+# test all 81 cards
+# for color in ['red', 'green', 'purple']:
+#     for shape in ['pill', 'diamond', 'snake']:
+#         for fill in ['empty', 'solid', 'striped']:
+#             for number in [1, 2, 3]:
+#                 cards.append(Card(color, shape, fill, number))
 
 def findSets(cards):
     start = time.time()
     count = 0
     results = []
-    for i in range(10):
+    indices = []
+    for i in range(len(cards)):
         c1 = cards[i]
-        for j in range(i+1, 12):
+        for j in range(i+1, len(cards)):
             c2 = cards[j]
-            for k in range(j+1, 12):
+            for k in range(j+1, len(cards)):
                 count += 1
                 c3 = cards[k]
                 if isSet(c1, c2, c3):
                     results.append([c1, c2, c3])
+                    indices.append([i, j, k])
     end = time.time()
     print('time', end - start)
-    return results
+    return results, indices
 
 def isSet(c1, c2, c3):
     return color(c1, c2, c3) and shape(c1, c2, c3) and fill(c1, c2, c3) and number(c1, c2, c3)
@@ -63,6 +72,7 @@ def fill(c1, c2, c3):
 def number(c1, c2, c3):
     return (c1.number == c2.number == c3.number) or (c1.number != c2.number and c1.number != c3.number and c2.number != c3.number)
 
-sets = findSets(cards)
+sets, indices = findSets(cards)
+print('number of sets: %d' % len(indices))
 print(sets)
-print(len(sets))
+print(indices)
