@@ -1,10 +1,10 @@
 import time
 
 class Card:
-    # color =  red | green | purple
-    # shape = pill | diamond | snake
-    # fill = empty | solid | striped
-    # number = 1 | 2 | 3
+    # color: red | green | purple
+    # shape: pill | diamond | snake
+    # fill: empty | solid | striped
+    # number: 1 | 2 | 3
     def __init__(self, color, shape, fill, number):
         self.color = color
         self.shape = shape
@@ -17,28 +17,18 @@ class Card:
     def __str__(self):
         return self.color + " " + self.shape + " " + self.fill + " " + str(self.number)
 
-cards = []
-cards.append(Card('red', 'snake', 'striped', 1))
-cards.append(Card('red', 'pill', 'striped', 2))
-cards.append(Card('red', 'diamond', 'striped', 2))
-cards.append(Card('red', 'pill', 'solid', 2))
-cards.append(Card('green', 'diamond', 'solid', 1))
-cards.append(Card('purple', 'pill', 'solid', 3))
-cards.append(Card('red', 'diamond', 'empty', 1))
-cards.append(Card('purple', 'diamond', 'solid', 2))
-cards.append(Card('green', 'snake', 'striped', 2))
-cards.append(Card('green', 'snake', 'empty', 1))
-cards.append(Card('green', 'pill', 'empty', 3))
-cards.append(Card('red', 'diamond', 'solid', 3))
+# Example set board addition
+# cards = []
+# cards.append(Card('red', 'snake', 'striped', 1))
 
-# test all 81 cards
+# Test all 81 cards
 # for color in ['red', 'green', 'purple']:
 #     for shape in ['pill', 'diamond', 'snake']:
 #         for fill in ['empty', 'solid', 'striped']:
 #             for number in [1, 2, 3]:
 #                 cards.append(Card(color, shape, fill, number))
 
-def findSets(cards):
+def find_sets(cards):
     start = time.time()
     count = 0
     results = []
@@ -54,10 +44,10 @@ def findSets(cards):
                     results.append([c1, c2, c3])
                     indices.append([i, j, k])
     end = time.time()
-    print('time', end - start)
+    # print('time', end - start)
     return results, indices
 
-def isSet(c1, c2, c3):
+def is_set(c1, c2, c3):
     return color(c1, c2, c3) and shape(c1, c2, c3) and fill(c1, c2, c3) and number(c1, c2, c3)
 
 def color(c1, c2, c3):
@@ -72,7 +62,7 @@ def fill(c1, c2, c3):
 def number(c1, c2, c3):
     return (c1.number == c2.number == c3.number) or (c1.number != c2.number and c1.number != c3.number and c2.number != c3.number)
 
-sets, indices = findSets(cards)
-print('number of sets: %d' % len(indices))
-print(sets)
-print(indices)
+# sets, indices = findSets(cards)
+# print('number of sets: %d' % len(indices))
+# print(sets)
+# print(indices)
