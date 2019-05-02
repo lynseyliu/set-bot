@@ -24,7 +24,11 @@ while cap.isOpened():
         cards = []
         process_frame.classify(frame, cards)
         sets, indices = play_set.find_sets(cards)
-        print(sets)
+        if args.play:
+            print(sets)
+        elif args.check:
+            if len(sets) == 0:
+                print('No sets, lay down 3 more!')
 
     # Display resulting frame
     cv2.imshow('set-bot', frame)
