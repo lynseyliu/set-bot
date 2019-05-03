@@ -15,7 +15,10 @@ class Card:
         return str(self)
 
     def __str__(self):
-        return self.color + " " + self.shape + " " + self.fill + " " + str(self.number)
+        s = ""
+        if self.number > 1:
+            s = "s"
+        return str(self.number) + " " + self.color + " " + self.fill + " " + self.shape + s
 
 # Example set board addition
 # cards = []

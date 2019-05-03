@@ -12,8 +12,10 @@ numpy==1.16.0
 opencv-python==3.4.3.18
 torch==0.4.1
 torchvision==0.2.1
+pyobjc==5.2
+pyttsx3==2.7
 ```
 
 ### Usage
 `python main.py -play` to play Set against the bot.  
-`python main.py -check` to use the bot to check for no sets on the board.
+`python main.py -check` to use the bot to check for sets on the board.
