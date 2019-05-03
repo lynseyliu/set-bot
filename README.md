@@ -12,6 +12,7 @@ numpy==1.16.0
 opencv-python==3.4.3.18
 torch==0.4.1
 torchvision==0.2.1
+scikit-image==0.15.0
 pyobjc==5.2
 pyttsx3==2.7
 ```
